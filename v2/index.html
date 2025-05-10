@@ -5,8 +5,10 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Drive File Manager</title>
-  <style>
+  <title>Google Drive File Manager</title> 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
     /* styles.css */
 
 :root {
@@ -186,6 +188,19 @@ h2 i {
 .file-name, .folder-name {
   flex: 1;
   margin-right: 15px;
+}
+
+.file-link {
+  text-decoration: none;
+  color: var(--text-color);
+  display: block;
+  padding: 8px 0;
+  transition: color 0.2s;
+}
+
+.file-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
 }
 
 .folder-name {
@@ -500,8 +515,7 @@ h2 i {
   }
 }
   </style>
-  <!-- <link rel="stylesheet" href="styles.css"> -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 </head>
 <body>
   <div class="container">
@@ -582,12 +596,12 @@ h2 i {
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
 
-  <!-- <script src="script.js"></script> -->
-  <script>
- // script.js
-
+ <script>
+// script.js
 // กำหนด ID ของโฟลเดอร์หลักที่ต้องการใช้งาน
-const ROOT_FOLDER_ID = 'YOUR_GOOGLE_DRIVE_FOLDER_ID';  // แก้ไข FOLDER_ID
+
+// สามารถแก้ไขโฟลเดอร์หลักที่ต้องการเก็บไฟล์
+const ROOT_FOLDER_ID = 'ID ของโฟลเดอร์หลักที่ต้องการเก็บไฟล์';
 
 // Global variables
 let currentFileId = null;
@@ -672,6 +686,8 @@ function updatePathNavigator() {
 }
 
 // ฟังก์ชันแสดงรายการไฟล์และโฟลเดอร์
+// แก้ไขฟังก์ชัน renderItems ในไฟล์ script.js
+
 function renderItems(items) {
   allItems = items; // เก็บข้อมูลไว้ใช้ในฟังก์ชันค้นหา
   const fileListElement = document.getElementById('fileList');
@@ -688,8 +704,18 @@ function renderItems(items) {
     return;
   }
   
+  // เรียงลำดับโฟลเดอร์ตามตัวอักษร (ก-ฮ, A-Z)
+  const sortedFolders = [...items.folders].sort((a, b) => {
+    return a.name.localeCompare(b.name, 'th');
+  });
+  
+  // เรียงลำดับไฟล์ตามตัวอักษร (ก-ฮ, A-Z)
+  const sortedFiles = [...items.files].sort((a, b) => {
+    return b.name.localeCompare(a.name, 'th');
+  });
+  
   // สร้าง HTML สำหรับแสดงรายการโฟลเดอร์
-  const folderItems = items.folders.map(folder => `
+  const folderItems = sortedFolders.map(folder => `
     <div class="folder-item" id="folder-${folder.id}" onclick="openFolder('${folder.id}', '${folder.name}')">
       <div class="icon-container">
         <i class="material-icons folder-icon">folder</i>
@@ -709,19 +735,19 @@ function renderItems(items) {
   `).join('');
   
   // สร้าง HTML สำหรับแสดงรายการไฟล์
-  const fileItems = items.files.map(file => `
+  const fileItems = sortedFiles.map(file => `
     <div class="file-item" id="file-${file.id}">
       <div class="icon-container">
         <i class="material-icons file-icon">description</i>
       </div>
       <div class="file-name">
-        <input type="text" id="name_${file.id}" value="${file.name}" />
+        <a href="${file.link}" target="_blank" class="file-link">${file.name}</a>
       </div>
       <div class="actions">
         <a href="${file.link}" target="_blank" class="btn btn-secondary">
           <i class="material-icons">visibility</i> ดู
         </a>
-        <button onclick="renameFile('${file.id}')" class="btn btn-primary">
+        <button onclick="renameFile('${file.id}', '${file.name}', event)" class="btn btn-primary">
           <i class="material-icons">edit</i> เปลี่ยนชื่อ
         </button>
         <button onclick="showMoveModal('${file.id}', '${file.name}')" class="btn btn-warning">
@@ -737,8 +763,57 @@ function renderItems(items) {
     </div>
   `).join('');
   
-  // รวมและแสดงผล
-  fileListElement.innerHTML = folderItems + fileItems;
+  // ใส่หัวข้อแสดงส่วนโฟลเดอร์และไฟล์ ถ้ามีทั้งสองประเภท
+  let foldersSection = '';
+  let filesSection = '';
+  
+  if (sortedFolders.length > 0) {
+    foldersSection = `
+      <div class="section-header folder-section">
+        <i class="material-icons">folder</i> โฟลเดอร์ (${sortedFolders.length})
+      </div>
+      ${folderItems}
+    `;
+  }
+  
+  if (sortedFiles.length > 0) {
+    filesSection = `
+      <div class="section-header file-section">
+        <i class="material-icons">insert_drive_file</i> ไฟล์ (${sortedFiles.length})
+      </div>
+      ${fileItems}
+    `;
+  }
+  
+  // รวมและแสดงผล โดยแสดงโฟลเดอร์ก่อน แล้วค่อยแสดงไฟล์
+  fileListElement.innerHTML = foldersSection + filesSection;
+}
+
+// ฟังก์ชันค้นหาต้องได้รับการอัพเดทด้วย
+function searchItems() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  
+  if (!searchTerm) {
+    // ถ้าไม่มีคำค้นหา แสดงทั้งหมด
+    renderItems(allItems);
+    return;
+  }
+  
+  // กรองโฟลเดอร์ตามคำค้นหา
+  const filteredFolders = allItems.folders.filter(folder => 
+    folder.name.toLowerCase().includes(searchTerm)
+  );
+  
+  // กรองไฟล์ตามคำค้นหา
+  const filteredFiles = allItems.files.filter(file => 
+    file.name.toLowerCase().includes(searchTerm)
+  );
+  
+  // แสดงผลลัพธ์การค้นหา
+  renderItems({
+    folders: filteredFolders,
+    files: filteredFiles
+  });
 }
 
 // ฟังก์ชันเปิดโฟลเดอร์
@@ -782,32 +857,6 @@ function navigateToRoot() {
   fetchItems(ROOT_FOLDER_ID);
 }
 
-// ฟังก์ชันค้นหาไฟล์และโฟลเดอร์
-function searchItems() {
-  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-  
-  if (!searchTerm) {
-    // ถ้าไม่มีคำค้นหา แสดงทั้งหมด
-    renderItems(allItems);
-    return;
-  }
-  
-  // กรองโฟลเดอร์ตามคำค้นหา
-  const filteredFolders = allItems.folders.filter(folder => 
-    folder.name.toLowerCase().includes(searchTerm)
-  );
-  
-  // กรองไฟล์ตามคำค้นหา
-  const filteredFiles = allItems.files.filter(file => 
-    file.name.toLowerCase().includes(searchTerm)
-  );
-  
-  // แสดงผลลัพธ์การค้นหา
-  renderItems({
-    folders: filteredFolders,
-    files: filteredFiles
-  });
-}
 
 // ฟังก์ชันลบไฟล์
 function deleteFile(fileId) {
@@ -849,27 +898,39 @@ function deleteFolder(folderId, event) {
 }
 
 // ฟังก์ชันเปลี่ยนชื่อไฟล์
-function renameFile(fileId) {
-  const inputElement = document.getElementById('name_' + fileId);
-  const newName = inputElement.value.trim();
+function renameFile(fileId, currentName, event) {
+  // ป้องกันการคลิกลิงก์เมื่อคลิกที่ปุ่มเปลี่ยนชื่อ
+  if (event) {
+    event.stopPropagation();
+  }
   
-  if (!newName) {
-    showToast('กรุณาระบุชื่อไฟล์', true);
+  // แสดง prompt สำหรับใส่ชื่อใหม่
+  const newName = prompt('กรุณาใส่ชื่อไฟล์ใหม่:', currentName);
+  
+  if (!newName || newName.trim() === '') {
     return;
   }
   
-  inputElement.disabled = true;
+  const fileElement = document.getElementById(`file-${fileId}`);
+  if (fileElement) {
+    fileElement.style.opacity = '0.5';
+  }
   
   google.script.run
     .withSuccessHandler(() => {
-      inputElement.disabled = false;
+      if (fileElement) {
+        fileElement.style.opacity = '1';
+      }
       showToast('เปลี่ยนชื่อไฟล์เรียบร้อยแล้ว');
+      fetchItems(currentFolderId);
     })
     .withFailureHandler((error) => {
-      inputElement.disabled = false;
+      if (fileElement) {
+        fileElement.style.opacity = '1';
+      }
       handleError(error);
     })
-    .renameFile(fileId, newName);
+    .renameFile(fileId, newName.trim());
 }
 
 // ฟังก์ชันเปลี่ยนชื่อโฟลเดอร์
@@ -1057,5 +1118,6 @@ window.onload = function() {
   fetchItems();
 };
   </script>
+ 
 </body>
 </html>
