@@ -55,7 +55,7 @@ const FOLDER_ID = 'YOUR_GOOGLE_DRIVE_FOLDER_ID';
 ```
 
 
-## แก้ไขไฟล์ index.html บรรทัดที่ 590
+## แก้ไขไฟล์ index.html บรรทัดที่ 604
 ```
 const ROOT_FOLDER_ID = 'YOUR_GOOGLE_DRIVE_FOLDER_ID';  // แก้ไข FOLDER_ID
 ```
