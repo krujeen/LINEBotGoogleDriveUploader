@@ -1,8 +1,10 @@
 // code.gs
+// แก้บรรทัดที่ 4,5,6 และ 15
 
-const LINE_CHANNEL_ACCESS_TOKEN = 'YOUR_CHANNEL_ACCESS_TOKEN';
-const LINE_CHANNEL_SECRET = 'YOUR_CHANNEL_SECRET';
-const FOLDER_ID = 'YOUR_GOOGLE_DRIVE_FOLDER_ID';
+const LINE_CHANNEL_ACCESS_TOKEN = 'กรอก Channel access token';
+const LINE_CHANNEL_SECRET = 'กรอก Channel secret';
+const FOLDER_ID = 'ID ของโฟลเดอร์หลักที่ต้องการเก็บไฟล์';
+
 
 /**
  * เปิดเว็บแอพเมื่อเปิดสคริปต์
@@ -10,8 +12,19 @@ const FOLDER_ID = 'YOUR_GOOGLE_DRIVE_FOLDER_ID';
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('index')
     .setTitle('Google Drive File Manager')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    .setFaviconUrl('https://www.krujeen.com/wp-content/uploads/2020/04/logo_krujeen3.png')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
+
+
+// ฟังก์ชันสำหรับแทรกไฟล์ HTML อื่นๆ
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+
+
 function doPost(e) {
   const json = JSON.parse(e.postData.contents);
   const event = json.events[0];
@@ -25,6 +38,8 @@ function doPost(e) {
   // -----------------------------
   // ✅ 1. กรณีข้อความเริ่มต้นด้วย "/"
   // -----------------------------
+
+  // ✅ ตรวจสอบคำสั่งหมวดหมู่
   if (message.type === 'text' && message.text.startsWith("/")) {
     const command = message.text.substring(1).trim(); // ตัด '/' ด้านหน้า
 
@@ -474,7 +489,3 @@ function createNewFolder(parentFolderId, folderName) {
     throw new Error("ไม่สามารถสร้างโฟลเดอร์ใหม่ได้: " + e.toString());
   }
 }
-
-
-
-
