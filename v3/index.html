@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<!-- index.html -->
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Drive File Manager</title> 
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+    /* styles.css */
+
+:root {
+  --primary-color: #1a73e8;
+  --secondary-color: #4285f4;
+  --accent-color: #8ab4f8;
+  --light-blue: #e8f0fe;
+  --hover-color: #f1f8ff;
+  --text-color: #202124;
+  --success-color: #34a853;
+  --danger-color: #ea4335;
+  --warning-color: #fbbc04;
+  --folder-color: #5f6368;
+  --folder-bg: #f1f3f4;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  color: var(--text-color);
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--accent-color);
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background 0.2s;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.path-navigator {
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.path-item {
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary-color);
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.path-item:hover {
+  text-decoration: underline;
+}
+
+.path-separator {
+  margin: 0 8px;
+  color: #5f6368;
+}
+
+h2 {
+  margin: 0;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+h2 i {
+  margin-right: 10px;
+}
+
+.search-bar {
+  margin: 15px;
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 4px 15px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s;
+}
+
+.search-bar:focus-within {
+  box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+  border-color: transparent;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  padding: 8px;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+}
+
+.search-bar i {
+  color: #5f6368;
+  margin-right: 8px;
+}
+
+.file-list {
+  padding: 0;
+}
+
+.folder-item, .file-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #eeeeee;
+  transition: background-color 0.2s;
+}
+
+.folder-item:hover, .file-item:hover {
+  background-color: var(--hover-color);
+}
+
+.folder-item {
+  cursor: pointer;
+}
+
+.icon-container {
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-icon {
+  color: #f1c40f;
+  font-size: 28px;
+}
+
+.file-icon {
+  color: var(--secondary-color);
+  font-size: 24px;
+}
+
+.file-name, .folder-name {
+  flex: 1;
+  margin-right: 15px;
+}
+
+.file-link {
+  text-decoration: none;
+  color: var(--text-color);
+  display: block;
+  padding: 8px 0;
+  transition: color 0.2s;
+}
+
+.file-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.folder-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.file-name input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.file-name input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn i {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0d5bcd;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.btn-secondary {
+  background-color: var(--light-blue);
+  color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: #d8e8fd;
+}
+
+.btn-danger {
+  background-color: white;
+  color: var(--danger-color);
+  border: 1px solid #ddd;
+}
+
+.btn-danger:hover {
+  background-color: #fce8e6;
+  border-color: var(--danger-color);
+}
+
+.btn-success {
+  background-color: white;
+  color: var(--success-color);
+  border: 1px solid #ddd;
+}
+
+.btn-success:hover {
+  background-color: #e6f4ea;
+  border-color: var(--success-color);
+}
+
+.btn-warning {
+  background-color: white;
+  color: var(--warning-color);
+  border: 1px solid #ddd;
+}
+
+.btn-warning:hover {
+  background-color: #fef7e0;
+  border-color: var(--warning-color);
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--secondary-color);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  border: 3px solid #eeeeee;
+  border-radius: 50%;
+  border-top: 3px solid var(--secondary-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: var(--success-color);
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 1000;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.error {
+  background-color: var(--danger-color);
+}
+
+.share-modal, .move-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+}
+
+.share-link-container {
+  margin-bottom: 20px;
+}
+
+.share-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.share-options {
+  margin-bottom: 20px;
+}
+
+.option-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.role-select, .folder-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Material Icons */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.empty-state img {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.folder-list {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.folder-option {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.folder-option:last-child {
+  border-bottom: none;
+}
+
+.folder-option:hover {
+  background-color: var(--light-blue);
+}
+
+.folder-option.selected {
+  background-color: var(--light-blue);
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .file-item, .folder-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .file-name, .folder-name {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .actions {
+    justify-content: center;
+  }
+}
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button id="backButton" class="back-button" style="display: none;" onclick="navigateBack()">
+        <i class="material-icons">arrow_back</i>
+      </button>
+      <h2><i class="material-icons">folder</i> <span id="headerTitle">รายการไฟล์ใน Google Drive</span></h2>
+    </div>
+    
+    <div id="pathNavigator" class="path-navigator" style="display: none;">
+      <span class="path-item" onclick="navigateToRoot()">หน้าหลัก</span>
+      <span id="pathItems"></span>
+    </div>
+    
+    <div class="search-bar">
+      <i class="material-icons">search</i>
+      <input type="text" id="searchInput" placeholder="ค้นหาไฟล์หรือโฟลเดอร์..." onkeyup="searchItems()">
+    </div>
+    
+    <div id="fileList" class="file-list">
+      <div class="loading">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+  
+  <!-- Share Modal -->
+  <div id="shareModal" class="share-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">แชร์ไฟล์</h3>
+        <button class="close-btn" onclick="closeShareModal()">&times;</button>
+      </div>
+      <div class="share-link-container">
+        <label for="shareLink" class="option-label">ลิงค์สำหรับแชร์:</label>
+        <input type="text" id="shareLink" class="share-input" readonly>
+        <div class="actions">
+          <button onclick="copyShareLink()" class="btn btn-secondary">
+            <i class="material-icons">content_copy</i> คัดลอกลิงค์
+          </button>
+        </div>
+      </div>
+      <div class="share-options">
+        <label class="option-label">สิทธิ์การเข้าถึง:</label>
+        <select id="shareRole" class="role-select">
+          <option value="reader">ผู้อ่าน - สามารถดูเท่านั้น</option>
+          <option value="commenter">ผู้แสดงความคิดเห็น - สามารถดูและแสดงความคิดเห็น</option>
+          <option value="writer">ผู้แก้ไข - สามารถดูและแก้ไข</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="closeShareModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="updateShareSettings()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Move File Modal -->
+  <div id="moveModal" class="move-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">ย้ายไฟล์</h3>
+        <button class="close-btn" onclick="closeMoveModal()">&times;</button>
+      </div>
+      
+      <p>เลือกโฟลเดอร์ปลายทางที่ต้องการย้าย <strong id="moveFileName"></strong></p>
+      
+      <div id="folderList" class="folder-list">
+        <div class="loading">กำลังโหลดโฟลเดอร์...</div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="closeMoveModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="moveFileToFolder()">ย้ายไฟล์</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+ <script>
+// script.js
+   
+// กำหนด ID ของโฟลเดอร์หลักที่ต้องการใช้งาน   
+// สามารถแก้ไขโฟลเดอร์หลักที่ต้องการเก็บไฟล์
+const ROOT_FOLDER_ID = 'ID ของโฟลเดอร์หลักที่ต้องการเก็บไฟล์';
+
+// Global variables
+let currentFileId = null;
+let currentFileName = '';
+let currentFolderId = ROOT_FOLDER_ID; // เปลี่ยนจาก 'root' เป็น ROOT_FOLDER_ID
+let folderStack = []; // เก็บประวัติการเข้าโฟลเดอร์
+let selectedFolderId = null; // สำหรับการย้ายไฟล์
+let allItems = []; // เก็บข้อมูลไฟล์และโฟลเดอร์ทั้งหมดในโฟลเดอร์ปัจจุบัน
+let rootFolderName = 'รายการไฟล์ใน Google Drive'; // ชื่อเริ่มต้นของโฟลเดอร์หลัก
+
+// ฟังก์ชันสำหรับดึงข้อมูลไฟล์และโฟลเดอร์
+function fetchItems(folderId = ROOT_FOLDER_ID) {
+  document.getElementById('fileList').innerHTML = '<div class="loading">กำลังโหลดข้อมูล...</div>';
+  
+  // อัพเดทสถานะการนำทาง
+  currentFolderId = folderId;
+  updateNavigationUI();
+  
+  google.script.run
+    .withSuccessHandler(renderItems)
+    .withFailureHandler(handleError)
+    .getFolderContents(folderId);
+    
+  // ถ้าเป็นโฟลเดอร์หลัก ให้ดึงชื่อโฟลเดอร์มาแสดงด้วย
+  if (folderId === ROOT_FOLDER_ID && folderStack.length === 0) {
+    google.script.run
+      .withSuccessHandler(updateRootFolderName)
+      .withFailureHandler(handleError)
+      .getFolderName(ROOT_FOLDER_ID);
+  }
+}
+
+// อัพเดทชื่อโฟลเดอร์หลัก
+function updateRootFolderName(folderName) {
+  if (folderName) {
+    rootFolderName = folderName;
+    // อัพเดทชื่อในส่วนหัวถ้าอยู่ที่โฟลเดอร์หลัก
+    if (currentFolderId === ROOT_FOLDER_ID && folderStack.length === 0) {
+      document.getElementById('headerTitle').textContent = rootFolderName;
+    }
+  }
+}
+
+// อัพเดทหน้า UI การนำทาง
+function updateNavigationUI() {
+  // แสดงปุ่มย้อนกลับถ้าไม่ได้อยู่ที่โฟลเดอร์หลัก
+  const backButton = document.getElementById('backButton');
+  const pathNavigator = document.getElementById('pathNavigator');
+  
+  if (folderStack.length > 0) {
+    backButton.style.display = 'flex';
+    pathNavigator.style.display = 'flex';
+  } else {
+    backButton.style.display = 'none';
+    pathNavigator.style.display = 'none';
+  }
+  
+  // อัพเดทชื่อโฟลเดอร์ในส่วนหัว
+  if (folderStack.length > 0) {
+    document.getElementById('headerTitle').textContent = folderStack[folderStack.length - 1].name;
+  } else {
+    document.getElementById('headerTitle').textContent = rootFolderName;
+  }
+  
+  // อัพเดทแถบนำทาง
+  updatePathNavigator();
+}
+
+// อัพเดทแถบนำทาง
+function updatePathNavigator() {
+  if (folderStack.length === 0) return;
+  
+  let pathHTML = '';
+  folderStack.forEach((folder, index) => {
+    if (index > 0) {
+      pathHTML += `<span class="path-separator">/</span>`;
+    }
+    pathHTML += `<span class="path-item" onclick="navigateToFolder('${folder.id}', ${index})">${folder.name}</span>`;
+  });
+  
+  document.getElementById('pathItems').innerHTML = pathHTML;
+}
+
+// ฟังก์ชันแสดงรายการไฟล์และโฟลเดอร์
+// แก้ไขฟังก์ชัน renderItems ในไฟล์ script.js
+
+function renderItems(items) {
+  allItems = items; // เก็บข้อมูลไว้ใช้ในฟังก์ชันค้นหา
+  const fileListElement = document.getElementById('fileList');
+  
+  // ตรวจสอบว่ามีข้อมูลหรือไม่
+  if (!items || (items.folders.length === 0 && items.files.length === 0)) {
+    fileListElement.innerHTML = `
+      <div class="empty-state">
+        <img src="/api/placeholder/120/120" alt="No items">
+        <h3>ไม่พบไฟล์หรือโฟลเดอร์</h3>
+        <p>โฟลเดอร์นี้ว่างเปล่า</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // เรียงลำดับโฟลเดอร์ตามตัวอักษร (ก-ฮ, A-Z)
+  const sortedFolders = [...items.folders].sort((a, b) => {
+    return a.name.localeCompare(b.name, 'th');
+  });
+  
+  // เรียงลำดับไฟล์ตามตัวอักษร (ก-ฮ, A-Z)
+  const sortedFiles = [...items.files].sort((a, b) => {
+    return b.name.localeCompare(a.name, 'th');
+  });
+  
+  // สร้าง HTML สำหรับแสดงรายการโฟลเดอร์
+  const folderItems = sortedFolders.map(folder => `
+    <div class="folder-item" id="folder-${folder.id}" onclick="openFolder('${folder.id}', '${folder.name}')">
+      <div class="icon-container">
+        <i class="material-icons folder-icon">folder</i>
+      </div>
+      <div class="folder-name">
+        ${folder.name}
+      </div>
+      <div class="actions">
+        <button onclick="renameFolder('${folder.id}', event)" class="btn btn-primary">
+          <i class="material-icons">edit</i> เปลี่ยนชื่อ
+        </button>
+        <button onclick="deleteFolder('${folder.id}', event)" class="btn btn-danger">
+          <i class="material-icons">delete</i> ลบ
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  // สร้าง HTML สำหรับแสดงรายการไฟล์
+  const fileItems = sortedFiles.map(file => `
+    <div class="file-item" id="file-${file.id}">
+      <div class="icon-container">
+        <i class="material-icons file-icon">description</i>
+      </div>
+      <div class="file-name">
+        <a href="${file.link}" target="_blank" class="file-link">${file.name}</a>
+      </div>
+      <div class="actions">
+        <a href="${file.link}" target="_blank" class="btn btn-secondary">
+          <i class="material-icons">visibility</i> ดู
+        </a>
+        <button onclick="renameFile('${file.id}', '${file.name}', event)" class="btn btn-primary">
+          <i class="material-icons">edit</i> เปลี่ยนชื่อ
+        </button>
+        <button onclick="showMoveModal('${file.id}', '${file.name}')" class="btn btn-warning">
+          <i class="material-icons">drive_file_move</i> ย้าย
+        </button>
+        <button onclick="showShareModal('${file.id}', '${file.name}')" class="btn btn-success">
+          <i class="material-icons">share</i> แชร์
+        </button>
+        <button onclick="deleteFile('${file.id}')" class="btn btn-danger">
+          <i class="material-icons">delete</i> ลบ
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  // ใส่หัวข้อแสดงส่วนโฟลเดอร์และไฟล์ ถ้ามีทั้งสองประเภท
+  let foldersSection = '';
+  let filesSection = '';
+  
+  if (sortedFolders.length > 0) {
+    foldersSection = `
+      <div class="section-header folder-section">
+        <i class="material-icons">folder</i> โฟลเดอร์ (${sortedFolders.length})
+      </div>
+      ${folderItems}
+    `;
+  }
+  
+  if (sortedFiles.length > 0) {
+    filesSection = `
+      <div class="section-header file-section">
+        <i class="material-icons">insert_drive_file</i> ไฟล์ (${sortedFiles.length})
+      </div>
+      ${fileItems}
+    `;
+  }
+  
+  // รวมและแสดงผล โดยแสดงโฟลเดอร์ก่อน แล้วค่อยแสดงไฟล์
+  fileListElement.innerHTML = foldersSection + filesSection;
+}
+
+// ฟังก์ชันค้นหาต้องได้รับการอัพเดทด้วย
+function searchItems() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  
+  if (!searchTerm) {
+    // ถ้าไม่มีคำค้นหา แสดงทั้งหมด
+    renderItems(allItems);
+    return;
+  }
+  
+  // กรองโฟลเดอร์ตามคำค้นหา
+  const filteredFolders = allItems.folders.filter(folder => 
+    folder.name.toLowerCase().includes(searchTerm)
+  );
+  
+  // กรองไฟล์ตามคำค้นหา
+  const filteredFiles = allItems.files.filter(file => 
+    file.name.toLowerCase().includes(searchTerm)
+  );
+  
+  // แสดงผลลัพธ์การค้นหา
+  renderItems({
+    folders: filteredFolders,
+    files: filteredFiles
+  });
+}
+
+// ฟังก์ชันเปิดโฟลเดอร์
+function openFolder(folderId, folderName) {
+  // เพิ่มโฟลเดอร์ปัจจุบันเข้าไปในสแต็ค
+  folderStack.push({ id: folderId, name: folderName });
+  
+  // ดึงข้อมูลในโฟลเดอร์
+  fetchItems(folderId);
+}
+
+// ฟังก์ชันนำทางย้อนกลับ
+function navigateBack() {
+  if (folderStack.length > 0) {
+    // ลบโฟลเดอร์ปัจจุบันออกจากสแต็ค
+    folderStack.pop();
+    
+    if (folderStack.length > 0) {
+      // ไปยังโฟลเดอร์ก่อนหน้า
+      const previousFolder = folderStack[folderStack.length - 1];
+      // ต้องลบออกก่อนเพราะ fetchItems จะเพิ่มเข้าไปใหม่
+      folderStack.pop();
+      fetchItems(previousFolder.id);
+    } else {
+      // กลับไปที่โฟลเดอร์หลัก
+      fetchItems(ROOT_FOLDER_ID);
+    }
+  }
+}
+
+// ฟังก์ชันนำทางไปยังโฟลเดอร์ในแถบนำทาง
+function navigateToFolder(folderId, index) {
+  // ตัดสแต็คออกจนถึง index ที่ต้องการ
+  folderStack = folderStack.slice(0, index + 1);
+  fetchItems(folderId);
+}
+
+// ฟังก์ชันนำทางกลับไปที่หน้าหลัก
+function navigateToRoot() {
+  folderStack = [];
+  fetchItems(ROOT_FOLDER_ID);
+}
+
+
+// ฟังก์ชันลบไฟล์
+function deleteFile(fileId) {
+  const password = prompt('กรุณากรอกรหัสผ่านเพื่อยืนยันการลบไฟล์:');
+  if (!password) return;
+
+  if (confirm('ยืนยันการลบไฟล์นี้?')) {
+    const fileElement = document.getElementById(`file-${fileId}`);
+    if (fileElement) {
+      fileElement.style.opacity = '0.5';
+    }
+    
+    google.script.run
+      .withSuccessHandler(() => {
+        showToast('ลบไฟล์เรียบร้อยแล้ว');
+        fetchItems(currentFolderId);
+      })
+      .withFailureHandler((error) => {
+        if (fileElement) fileElement.style.opacity = '1';
+        handleError(error);
+      })
+      .deleteFile(fileId, password);
+  }
+}
+
+// ฟังก์ชันลบโฟลเดอร์
+function deleteFolder(folderId, event) {
+  // ป้องกันการเปิดโฟลเดอร์เมื่อคลิกที่ปุ่มลบ
+  event.stopPropagation();
+  const password = prompt('กรุณากรอกรหัสผ่านเพื่อยืนยันการลบโฟลเดอร์:');
+  if (!password) return;
+  
+  if (confirm('ยืนยันการลบโฟลเดอร์นี้? หากโฟลเดอร์มีไฟล์อยู่ภายใน ไฟล์ทั้งหมดจะถูกลบด้วย')) {
+    const folderElement = document.getElementById(`folder-${folderId}`);
+    if (folderElement) {
+      folderElement.style.opacity = '0.5';
+    }
+    
+    google.script.run
+      .withSuccessHandler(() => {
+        showToast('ลบโฟลเดอร์เรียบร้อยแล้ว');
+        fetchItems(currentFolderId);
+      })
+      .withFailureHandler((error) => {
+        if (folderElement) folderElement.style.opacity = '1';
+        handleError(error);
+      })
+      .deleteFolder(folderId, password);
+  }
+}
+
+// ฟังก์ชันเปลี่ยนชื่อไฟล์
+function renameFile(fileId, currentName, event) {
+  // ป้องกันการคลิกลิงก์เมื่อคลิกที่ปุ่มเปลี่ยนชื่อ
+  if (event) {
+    event.stopPropagation();
+  }
+  
+  // แสดง prompt สำหรับใส่ชื่อใหม่
+  const newName = prompt('กรุณาใส่ชื่อไฟล์ใหม่:', currentName);
+  if (!newName || newName.trim() === '') {
+    return;
+  }
+
+  const password = prompt('กรุณากรอกรหัสผ่านเพื่อยืนยันการเปลี่ยนชื่อ:');
+  if (!password) return;
+  
+  const fileElement = document.getElementById(`file-${fileId}`);
+  if (fileElement) {
+    fileElement.style.opacity = '0.5';
+  }
+  
+  google.script.run
+    .withSuccessHandler(() => {
+      if (fileElement) {
+        fileElement.style.opacity = '1';
+      }
+      showToast('เปลี่ยนชื่อไฟล์เรียบร้อยแล้ว');
+      fetchItems(currentFolderId);
+    })
+    .withFailureHandler((error) => {
+      if (fileElement) {
+        fileElement.style.opacity = '1';
+      }
+      handleError(error);
+    })
+    .renameFile(fileId, newName.trim(), password);
+}
+
+// ฟังก์ชันเปลี่ยนชื่อโฟลเดอร์
+function renameFolder(folderId, event) {
+  // ป้องกันการเปิดโฟลเดอร์เมื่อคลิกที่ปุ่มเปลี่ยนชื่อ
+  event.stopPropagation();
+  
+  // แสดง prompt สำหรับใส่ชื่อใหม่
+  const newName = prompt('กรุณาใส่ชื่อโฟลเดอร์ใหม่:');
+  if (!newName || newName.trim() === '') {
+    return;
+  }
+  
+  const password = prompt('กรุณากรอกรหัสผ่านเพื่อยืนยันการเปลี่ยนชื่อ:');
+  if (!password) return;
+
+  const folderElement = document.getElementById(`folder-${folderId}`);
+  if (folderElement) {
+    folderElement.style.opacity = '0.5';
+  }
+  
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('เปลี่ยนชื่อโฟลเดอร์เรียบร้อยแล้ว');
+      fetchItems(currentFolderId);
+    })
+    .withFailureHandler(handleError)
+    .renameFolder(folderId, newName.trim(), password);
+}
+
+// ฟังก์ชันแสดง Share Modal
+function showShareModal(fileId, fileName) {
+  currentFileId = fileId;
+  currentFileName = fileName;
+  
+  // รีเซ็ตฟอร์ม
+  document.getElementById('shareLink').value = '';
+  document.getElementById('shareRole').value = 'reader';
+  
+  // แสดง Modal
+  document.getElementById('shareModal').style.display = 'flex';
+  
+  // ดึงลิงค์แชร์ปัจจุบัน (ถ้ามี)
+  google.script.run
+    .withSuccessHandler(updateShareModalInfo)
+    .withFailureHandler(handleError)
+    .getShareLink(fileId);
+}
+
+// อัพเดทข้อมูลใน Share Modal
+function updateShareModalInfo(shareInfo) {
+  if (shareInfo && shareInfo.link) {
+    document.getElementById('shareLink').value = shareInfo.link;
+    
+    // อัพเดท role ถ้ามีข้อมูล
+    if (shareInfo.role) {
+      document.getElementById('shareRole').value = shareInfo.role;
+    }
+  }
+}
+
+// ปิด Share Modal
+function closeShareModal() {
+  document.getElementById('shareModal').style.display = 'none';
+  currentFileId = null;
+}
+
+// คัดลอกลิงค์แชร์
+function copyShareLink() {
+  const linkInput = document.getElementById('shareLink');
+  linkInput.select();
+  document.execCommand('copy');
+  showToast('คัดลอกลิงค์แล้ว');
+}
+
+// อัพเดทการตั้งค่าการแชร์
+function updateShareSettings() {
+  if (!currentFileId) return;
+  
+  const role = document.getElementById('shareRole').value;
+  
+  google.script.run
+    .withSuccessHandler((shareInfo) => {
+      document.getElementById('shareLink').value = shareInfo.link;
+      showToast('อัพเดทการแชร์เรียบร้อยแล้ว');
+    })
+    .withFailureHandler(handleError)
+    .createShareLink(currentFileId, role);
+}
+
+// แสดง Move Modal
+function showMoveModal(fileId, fileName) {
+  currentFileId = fileId;
+  currentFileName = fileName;
+  selectedFolderId = null;
+  
+  // แสดงชื่อไฟล์ที่จะย้าย
+  document.getElementById('moveFileName').textContent = fileName;
+  
+  // แสดง Modal
+  document.getElementById('moveModal').style.display = 'flex';
+  
+  // โหลดรายการโฟลเดอร์
+  document.getElementById('folderList').innerHTML = '<div class="loading">กำลังโหลดโฟลเดอร์...</div>';
+  
+  google.script.run
+    .withSuccessHandler(renderFolderOptions)
+    .withFailureHandler(handleError)
+    .getAllFolders(ROOT_FOLDER_ID);
+}
+
+// แสดงรายการโฟลเดอร์ในหน้าต่างย้ายไฟล์
+function renderFolderOptions(folders) {
+  const folderListElement = document.getElementById('folderList');
+  
+  if (!folders || folders.length === 0) {
+    folderListElement.innerHTML = '<div class="empty-state">ไม่พบโฟลเดอร์</div>';
+    return;
+  }
+  
+  const folderOptions = folders.map(folder => `
+    <div class="folder-option" onclick="selectFolder('${folder.id}', this)" data-id="${folder.id}">
+      <i class="material-icons folder-icon">folder</i>
+      ${folder.name}
+    </div>
+  `).join('');
+  
+  folderListElement.innerHTML = folderOptions;
+}
+
+// เลือกโฟลเดอร์ปลายทาง
+function selectFolder(folderId, element) {
+  // ล้างการเลือกเดิม
+  const selected = document.querySelector('.folder-option.selected');
+  if (selected) {
+    selected.classList.remove('selected');
+  }
+  
+  // เลือกโฟลเดอร์ใหม่
+  element.classList.add('selected');
+  selectedFolderId = folderId;
+}
+
+// ย้ายไฟล์ไปยังโฟลเดอร์ที่เลือก
+function moveFileToFolder() {
+  if (!currentFileId || !selectedFolderId) {
+    showToast('กรุณาเลือกโฟลเดอร์ปลายทาง', true);
+    return;
+  }
+  
+  google.script.run
+    .withSuccessHandler(() => {
+      closeMoveModal();
+      showToast('ย้ายไฟล์เรียบร้อยแล้ว');
+      fetchItems(currentFolderId);
+    })
+    .withFailureHandler(handleError)
+    .moveFile(currentFileId, selectedFolderId);
+}
+
+// ปิด Move Modal
+function closeMoveModal() {
+  document.getElementById('moveModal').style.display = 'none';
+  currentFileId = null;
+  selectedFolderId = null;
+}
+
+// แสดง Toast notification
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = isError ? 'toast error show' : 'toast show';
+  
+  setTimeout(() => {
+    toast.className = 'toast';
+  }, 3000);
+}
+
+// จัดการข้อผิดพลาด
+function handleError(error) {
+  console.error(error);
+  showToast(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', true);
+}
+
+// โหลดไฟล์เมื่อโหลดหน้าเว็บเสร็จ
+window.onload = function() {
+  fetchItems();
+};
+  </script>
+ 
+</body>
+</html>
